@@ -95,5 +95,5 @@ async def main():
                 ),
             )
     except Exception as e:
-        logger.error(f"Server error: {str(e)}")
+        logger.error(f"Server error: {str(e)}", exc_info=True)
         raise
