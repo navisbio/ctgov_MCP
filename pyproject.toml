@@ -1,35 +1,20 @@
 [project]
-name = "mcp-server-aact"
+name = "ctgov_mcp"
 version = "0.1.0"
-description = "MCP server for AACT clinical trials database"
-requires-python = ">=3.10"
+description = "AACT Clinical Trials MCP Server"
+requires-python = ">=3.9"
 dependencies = [
-    "mcp",
     "psycopg2-binary",
-    "python-dotenv"
+    "python-dotenv",
 ]
 
 [project.optional-dependencies]
-test = [
-    "pytest",
-    "pytest-asyncio"
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio",
+    "pytest-cov",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
-testpaths = ["tests"]
-asyncio_default_fixture_loop_scope = "function"
-
-[tool.uv]
-dev-dependencies = [
-    "pyright>=1.1.389",
-    "pytest>=8.3.4",
-    "pytest-asyncio>=0.24.0",
-]
-
-[project.scripts]
-mcp-server-aact = "mcp_server_aact:main"
