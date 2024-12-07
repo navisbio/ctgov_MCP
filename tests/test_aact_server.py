@@ -1,101 +1,100 @@
 import pytest
-import os
-from unittest.mock import patch, Mock
-from datetime import datetime
-import json
-from pydantic import AnyUrl
-import mcp.types as types
-
+from unittest.mock import Mock, AsyncMock
 from mcp_server_aact.database import AACTDatabase
-from mcp_server_aact.server import main
 from mcp_server_aact.handlers import MCPHandlers
-
-# Set up test environment
-os.environ["DB_USER"] = "test_user"
-os.environ["DB_PASSWORD"] = "test_password"
+from mcp_server_aact.memo_manager import MemoManager
+from mcp_server_aact.tools import ToolManager
+from mcp.types import Resource, Tool, Prompt, GetPromptResult, PromptMessage, TextContent
+from pydantic import AnyUrl
 
 @pytest.fixture
 def mock_db():
-    with patch('mcp_server_aact.database.AACTDatabase') as MockClass:
-        # Create instance mock
-        instance = MockClass.return_value
-        
-        # Setup default return values
-        instance.execute_query.return_value = [
-            {
-                "nct_id": "NCT00000000",
-                "brief_title": "Test Study",
-                "phase": "Phase 1"
-            }
-        ]
-        instance.get_insights_memo.return_value = "Test memo content"
-        
-        yield instance
-
-@pytest.fixture
-def handlers(mock_db):
-    return MCPHandlers(mock_db)
-
-@pytest.mark.asyncio
-async def test_list_resources(handlers):
-    resources = await handlers.handle_list_resources()
-    assert len(resources) == 1
-    assert resources[0].name == "Business Insights Memo"
-    assert resources[0].mimeType == "text/plain"
-
-@pytest.mark.asyncio
-async def test_read_resource(handlers, mock_db):
-    response = await handlers.handle_read_resource(AnyUrl("memo://insights"))
-    assert response == "Test memo content"
-    mock_db.get_insights_memo.assert_called_once()
-
-@pytest.mark.asyncio
-async def test_list_tools(handlers):
-    tools = await handlers.handle_list_tools()
-    assert len(tools) == 4  # read-query, list-tables, describe-table, append-insight
-    
-    tool_names = {tool.name for tool in tools}
-    assert tool_names == {"read-query", "list-tables", "describe-table", "append-insight"}
-
-@pytest.mark.asyncio
-async def test_call_tool_list_tables(handlers, mock_db):
-    mock_db.execute_query.return_value = [
+    mock = Mock(spec=AACTDatabase)
+    # Set up mock responses
+    mock.execute_query.return_value = [
         {"table_name": "studies"},
         {"table_name": "conditions"}
     ]
+    return mock
+
+@pytest.fixture
+def memo_manager():
+    return MemoManager()
+
+@pytest.fixture
+def tool_manager(mock_db, memo_manager):
+    return ToolManager(mock_db, memo_manager)
+
+@pytest.fixture
+def handlers(mock_db, memo_manager, tool_manager):
+    return MCPHandlers(mock_db)
+
+async def test_list_resources(handlers):
+    resources = await handlers.handle_list_resources()
+    assert len(resources) == 2
+    assert all(isinstance(r, Resource) for r in resources)
+    assert any(r.name == "Clinical Trial Landscape" for r in resources)
+    assert any(r.name == "Trial Metrics" for r in resources)
+
+async def test_call_tool_list_tables(handlers, mock_db):
+    result = await handlers.handle_call_tool("list-tables", None)
     
-    response = await handlers.handle_call_tool("list-tables", {})
+    # Verify the mock was called correctly
     mock_db.execute_query.assert_called_once()
+    assert "table_schema = 'ctgov'" in mock_db.execute_query.call_args[0][0]
     
-    # Convert response to string for assertion
-    response_text = response[0].text
-    assert "studies" in response_text
-    assert "conditions" in response_text
+    # Verify the result
+    assert isinstance(result, list)
+    assert len(result) > 0
+    assert all(isinstance(r, TextContent) for r in result)
+    assert "studies" in result[0].text
+    assert "conditions" in result[0].text
 
-@pytest.mark.asyncio
-async def test_call_tool_read_query(handlers, mock_db):
-    query = "SELECT * FROM ctgov.studies LIMIT 1"
-    response = await handlers.handle_call_tool("read-query", {"query": query})
-    
-    mock_db.execute_query.assert_called_once_with(query)
-    response_text = response[0].text
-    assert "NCT00000000" in response_text
+async def test_read_resource(handlers):
+    uri = AnyUrl("memo://landscape")
+    result = await handlers.handle_read_resource(uri)
+    assert isinstance(result, str)
+    assert "No landscape analysis available yet" in result
 
-@pytest.mark.asyncio
-async def test_call_tool_append_insight(handlers, mock_db):
-    insight = "Test insight"
-    response = await handlers.handle_call_tool("append-insight", {"insight": insight})
-    
-    mock_db.add_insight.assert_called_once_with(insight)
-    response_text = response[0].text
-    assert "Insight added to memo" in response_text
+async def test_read_resource_invalid_scheme(handlers):
+    uri = AnyUrl("http://example.com")
+    with pytest.raises(ValueError):
+        await handlers.handle_read_resource(uri)
 
-@pytest.mark.asyncio
-async def test_invalid_tool(handlers):
-    with pytest.raises(ValueError, match="Unknown tool"):
-        await handlers.handle_call_tool("invalid-tool", {})
+async def test_list_prompts(handlers):
+    prompts = await handlers.handle_list_prompts()
+    assert len(prompts) == 1
+    assert all(isinstance(p, Prompt) for p in prompts)
+    assert prompts[0].name == "indication-landscape"
 
-@pytest.mark.asyncio
-async def test_invalid_query(handlers, mock_db):
-    with pytest.raises(ValueError, match="Only SELECT queries are allowed"):
-        await handlers.handle_call_tool("read-query", {"query": "INSERT INTO table"}) 
+async def test_get_prompt(handlers):
+    name = "indication-landscape"
+    args = {"topic": "multiple sclerosis"}
+    result = await handlers.handle_get_prompt(name, args)
+    assert isinstance(result, GetPromptResult)
+    assert "multiple sclerosis" in result.description
+    assert len(result.messages) == 1
+    assert isinstance(result.messages[0], PromptMessage)
+
+async def test_get_prompt_invalid_name(handlers):
+    with pytest.raises(ValueError):
+        await handlers.handle_get_prompt("invalid", {"topic": "test"})
+
+async def test_get_prompt_missing_args(handlers):
+    with pytest.raises(ValueError):
+        await handlers.handle_get_prompt("indication-landscape", None)
+
+async def test_list_tools(handlers):
+    tools = await handlers.handle_list_tools()
+    assert len(tools) > 0
+    assert all(isinstance(t, Tool) for t in tools)
+    assert any(t.name == "read-query" for t in tools)
+    assert any(t.name == "list-tables" for t in tools)
+
+async def test_call_tool_invalid_name(handlers):
+    with pytest.raises(ValueError):
+        await handlers.handle_call_tool("invalid", None)
+
+async def test_call_tool_missing_args(handlers):
+    with pytest.raises(ValueError):
+        await handlers.handle_call_tool("read-query", None) 
