@@ -4,6 +4,7 @@ import mcp.types as types
 from pydantic import AnyUrl
 from .database import AACTDatabase
 from .memo_manager import MemoManager
+from .tools import ToolManager
 
 logger = logging.getLogger('mcp_aact_server.handlers')
 
@@ -11,6 +12,7 @@ class MCPHandlers:
     def __init__(self, db: AACTDatabase):
         self.db = db
         self.memo_manager = MemoManager()
+        self.tool_manager = ToolManager(db, self.memo_manager)
 
     async def handle_list_resources(self) -> list[types.Resource]:
         logger.debug("Handling list_resources request")
@@ -92,129 +94,7 @@ class MCPHandlers:
         )
 
     async def handle_list_tools(self) -> list[types.Tool]:
-        return [
-            types.Tool(
-                name="read-query",
-                description="Execute a SELECT query on the AACT clinical trials database",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "query": {"type": "string", "description": "SELECT SQL query to execute"},
-                    },
-                    "required": ["query"],
-                },
-            ),
-            types.Tool(
-                name="list-tables",
-                description="List all tables in the AACT database",
-                inputSchema={
-                    "type": "object",
-                    "properties": {},
-                },
-            ),
-            types.Tool(
-                name="describe-table",
-                description="Get the schema information for a specific table in AACT",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "table_name": {"type": "string", "description": "Name of the table to describe"},
-                    },
-                    "required": ["table_name"],
-                },
-            ),
-            types.Tool(
-                name="append-insight",
-                description="Add a business insight to the memo",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "insight": {"type": "string", "description": "Business insight discovered from data analysis"},
-                    },
-                    "required": ["insight"],
-                },
-            ),
-            types.Tool(
-                name="append-landscape",
-                description="Add findings about trial patterns and development trends",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "finding": {"type": "string", "description": "Analysis finding about trial patterns or trends"},
-                    },
-                    "required": ["finding"],
-                },
-            ),
-            types.Tool(
-                name="append-metrics",
-                description="Add quantitative metrics about trials",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "metric": {"type": "string", "description": "Quantitative metric or statistical finding"},
-                    },
-                    "required": ["metric"],
-                },
-            ),
-        ]
+        return self.tool_manager.get_available_tools()
 
     async def handle_call_tool(self, name: str, arguments: dict[str, Any] | None) -> list[types.TextContent]:
-        try:
-            # Update the tool name check
-            if name not in {"list-tables", "describe-table", "read-query", "append-insight", 
-                           "append-landscape", "append-metrics"}:
-                raise ValueError(f"Unknown tool: {name}")
-
-            # Then check for arguments
-            if not arguments and name != "list-tables":  # list-tables doesn't need arguments
-                raise ValueError("Missing arguments")
-
-            if name == "list-tables":
-                results = self.db.execute_query("""
-                    SELECT table_name 
-                    FROM information_schema.tables 
-                    WHERE table_schema = 'ctgov'
-                    ORDER BY table_name;
-                """)
-                return [types.TextContent(type="text", text=str(results))]
-
-            elif name == "describe-table":
-                if "table_name" not in arguments:
-                    raise ValueError("Missing table_name argument")
-                results = self.db.execute_query("""
-                    SELECT column_name, data_type, character_maximum_length
-                    FROM information_schema.columns
-                    WHERE table_schema = 'ctgov' 
-                    AND table_name = %s
-                    ORDER BY ordinal_position;
-                """, {"table_name": arguments["table_name"]})
-                return [types.TextContent(type="text", text=str(results))]
-
-            elif name == "read-query":
-                if not arguments["query"].strip().upper().startswith("SELECT"):
-                    raise ValueError("Only SELECT queries are allowed for read-query")
-                results = self.db.execute_query(arguments["query"])
-                return [types.TextContent(type="text", text=str(results))]
-
-            elif name == "append-insight":
-                if "insight" not in arguments:
-                    raise ValueError("Missing insight argument")
-                self.db.add_insight(arguments["insight"])
-                return [types.TextContent(type="text", text="Insight added to memo")]
-
-            elif name == "append-landscape":
-                if "finding" not in arguments:
-                    raise ValueError("Missing finding argument")
-                self.db.add_landscape_finding(arguments["finding"])
-                return [types.TextContent(type="text", text="Landscape finding added")]
-
-            elif name == "append-metrics":
-                if "metric" not in arguments:
-                    raise ValueError("Missing metric argument")
-                self.db.add_metrics_finding(arguments["metric"])
-                return [types.TextContent(type="text", text="Metric added")]
-
-        except Exception as e:
-            if isinstance(e, ValueError):
-                raise
-            return [types.TextContent(type="text", text=f"Error: {str(e)}")] 
+        return await self.tool_manager.execute_tool(name, arguments) 

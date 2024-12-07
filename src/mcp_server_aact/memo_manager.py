@@ -8,28 +8,28 @@ class MemoManager:
         self.landscape_findings: list[str] = []
         self.metrics_findings: list[str] = []
 
-    def add_insight(self, insight: str):
-        """Add a business insight to the collection"""
-        self.insights.append(insight)
-        logger.debug(f"Added new insight. Total insights: {len(self.insights)}")
+    # def add_insight(self, insight: str):
+    #     """Add a business insight to the collection"""
+    #     self.insights.append(insight)
+    #     logger.debug(f"Added new insight. Total insights: {len(self.insights)}")
 
-    def get_insights_memo(self) -> str:
-        """Generate a formatted memo from collected insights"""
-        logger.debug(f"Generating memo with {len(self.insights)} insights")
-        if not self.insights:
-            return "No business insights have been discovered yet."
+    # def get_insights_memo(self) -> str:
+    #     """Generate a formatted memo from collected insights"""
+    #     logger.debug(f"Generating memo with {len(self.insights)} insights")
+    #     if not self.insights:
+    #         return "No business insights have been discovered yet."
 
-        insights = "\n".join(f"- {insight}" for insight in self.insights)
+    #     insights = "\n".join(f"- {insight}" for insight in self.insights)
 
-        memo = "📊 Clinical Trials Intelligence Memo\n\n"
-        memo += "Key Insights Discovered:\n\n"
-        memo += insights
+    #     memo = "📊 Clinical Trials Intelligence Memo\n\n"
+    #     memo += "Key Insights Discovered:\n\n"
+    #     memo += insights
 
-        if len(self.insights) > 1:
-            memo += "\nSummary:\n"
-            memo += f"Analysis has revealed {len(self.insights)} key insights about clinical trials and drug development."
+    #     if len(self.insights) > 1:
+    #         memo += "\nSummary:\n"
+    #         memo += f"Analysis has revealed {len(self.insights)} key insights about clinical trials and drug development."
 
-        return memo 
+    #     return memo 
 
     def get_landscape_memo(self) -> str:
         """Generate a formatted memo from collected landscape findings"""
