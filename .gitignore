@@ -55,3 +55,4 @@ site/
 
 # Windows
 Thumbs.db
+*.pyc

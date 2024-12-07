@@ -3,12 +3,14 @@ from typing import Any
 import mcp.types as types
 from pydantic import AnyUrl
 from .database import AACTDatabase
+from .memo_manager import MemoManager
 
 logger = logging.getLogger('mcp_aact_server.handlers')
 
 class MCPHandlers:
     def __init__(self, db: AACTDatabase):
         self.db = db
+        self.memo_manager = MemoManager()
 
     async def handle_list_resources(self) -> list[types.Resource]:
         logger.debug("Handling list_resources request")
@@ -39,11 +41,11 @@ class MCPHandlers:
             raise ValueError("Empty resource path")
 
         if path == "insights":
-            return self.db.get_insights_memo()
+            return self.memo_manager.get_insights_memo()
         elif path == "landscape":
-            return self.db.get_landscape_memo()
+            return self.memo_manager.get_landscape_memo()
         elif path == "metrics":
-            return self.db.get_metrics_memo()
+            return self.memo_manager.get_metrics_memo()
         else:
             logger.error(f"Unknown resource path: {path}")
             raise ValueError(f"Unknown resource path: {path}")
