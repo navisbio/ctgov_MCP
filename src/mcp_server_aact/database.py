@@ -18,19 +18,20 @@ class DateEncoder(json.JSONEncoder):
 
 class AACTDatabase:
     def __init__(self):
-        # Load environment variables
+        logger.info("Initializing AACT database connection")
         load_dotenv()
         
-        # Get AACT credentials from environment
         self.user = os.environ.get("DB_USER")
         self.password = os.environ.get("DB_PASSWORD")
         
         if not self.user or not self.password:
+            logger.error("Missing database credentials")
             raise ValueError("DB_USER and DB_PASSWORD environment variables must be set")
         
         self.host = "aact-db.ctti-clinicaltrials.org"
         self.database = "aact"
         self._init_database()
+        logger.info("AACT database initialization complete")
 
     def _init_database(self):
         """Test connection to the AACT database"""
@@ -42,17 +43,22 @@ class AACTDatabase:
                     db, schema = cur.fetchone()
                     logger.info(f"Connected to database: {db}, current schema: {schema}")
         except Exception as e:
-            logger.error(f"Database connection failed: {str(e)}")
-            raise
+            logger.error(f"Database connection failed: {str(e)}", exc_info=True)
+            raise RuntimeError(f"Database connection failed: {str(e)}")
 
     def _get_connection(self):
         """Get a new database connection"""
-        return psycopg2.connect(
-            host=self.host,
-            database=self.database,
-            user=self.user,
-            password=self.password
-        )
+        logger.debug("Creating new database connection")
+        try:
+            return psycopg2.connect(
+                host=self.host,
+                database=self.database,
+                user=self.user,
+                password=self.password
+            )
+        except Exception as e:
+            logger.error(f"Failed to create database connection: {str(e)}", exc_info=True)
+            raise RuntimeError(f"Failed to create database connection: {str(e)}")
 
     def execute_query(self, query: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
         """Execute a SQL query and return results as a list of dictionaries"""
@@ -78,5 +84,5 @@ class AACTDatabase:
                     return [dict(row) for row in results]
 
         except Exception as e:
-            logger.error(f"Database error executing query: {str(e)}")
-            raise
+            logger.error(f"Database error executing query: {str(e)}", exc_info=True)
+            raise RuntimeError(f"Database error: {str(e)}")

@@ -4,6 +4,7 @@ from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 from .database import AACTDatabase
 from .handlers import MCPHandlers
+from mcp.types import LoggingLevel, EmptyResult
 
 logger = logging.getLogger('mcp_aact_server')
 logger.setLevel(logging.DEBUG)
@@ -14,6 +15,11 @@ class AACTServer(Server):
         self.db = AACTDatabase()
         self.handlers = MCPHandlers(self.db)
         self._register_handlers()
+        
+        # Set up logging handler that sends to MCP client
+        self.log_handler = MCPLogHandler(self)
+        logger.addHandler(self.log_handler)
+        logger.info("AACT Server initialized")
 
     def _register_handlers(self):
         @self.list_resources()
@@ -39,6 +45,37 @@ class AACTServer(Server):
         @self.call_tool()
         async def handle_call_tool(name, arguments):
             return await self.handlers.handle_call_tool(name, arguments)
+
+        @self.set_logging_level()
+        async def handle_set_logging_level(level: LoggingLevel) -> EmptyResult:
+            """Handle requests to change the logging level"""
+            logger.info(f"Setting logging level to {level}")
+            logging.getLogger('mcp_aact_server').setLevel(level.upper())
+            
+            # Send confirmation through the session
+            if hasattr(self, 'request_context') and self.request_context:
+                await self.request_context.session.send_log_message(
+                    level="info",
+                    data=f"Log level set to {level}"
+                )
+            
+            return EmptyResult()
+
+class MCPLogHandler(logging.Handler):
+    def __init__(self, server):
+        super().__init__()
+        self.server = server
+
+    def emit(self, record):
+        try:
+            if hasattr(self.server, 'request_context') and self.server.request_context:
+                msg = self.format(record)
+                self.server.request_context.session.send_log_message(
+                    level=record.levelname.lower(),
+                    data=msg
+                )
+        except Exception:
+            self.handleError(record)
 
 async def main():
     try:
