@@ -65,18 +65,24 @@ AACT requires a free account to access the database. You can sign up at:
 
 https://aact.ctti-clinicaltrials.org/users/sign_up
 
+
+## Environment Variables
+The server requires the following environment variables:
+- `DB_USER`: AACT database username
+- `DB_PASSWORD`: AACT database password
+
 ## Usage with Claude Desktop
 
 Note that you need Claude Desktop and a Claude subscription at the moment. 
 
 Add the following lines to the file claude_desktop_config.json. (On macOS, the file is located at /Users/YOUR_USERNAME/Library/Application Support/Claude/claude_desktop_config.json and you will need to create it yourself if it does not exist yet).
 
-```bash
+```json
 "mcpServers": {
     "CTGOV-MCP": {
       "command": "uvx",
       "args": [
-        "mcp-server-aact"
+        "server_clinicaltrials_aact"
       ],
       "env": {
         "DB_USER": USERNAME,
@@ -86,10 +92,33 @@ Add the following lines to the file claude_desktop_config.json. (On macOS, the f
 }
 ```
 
-## Environment Variables
-The server requires the following environment variables:
-- `DB_USER`: AACT database username
-- `DB_PASSWORD`: AACT database password
+Note: Replace `YOUR_AACT_USERNAME` and `YOUR_AACT_PASSWORD` with your actual AACT credentials.
+
+
+## Roadmap & Contribution
+
+Over the coming weeks and months, we will build other MCP servers for the following datasets:
+
+- OpenFDA: Access to FDA drug, device, and food data
+- ChEMBL: Bioactive molecules and drug-like compounds
+- Open Targets: Genetic associations and drug target validation
+- And more to come!
+
+We warmly welcome contributions of all kinds! Happy to hear from you if you
+
+- Have specific use cases you'd like to explore
+- Need customizations for your research
+- Want to suggest additional datasets
+- Are interested in contributing code, documentation, or ideas
+- Want to improve existing features
+
+Please reach out by:
+- Opening an issue on GitHub
+- Starting a discussion in our repository
+- Emailing us at jonas.walheim@navis-bio.com
+- Submitting pull requests
+
+Your feedback helps shape our development priorities and align them with the research community's needs.
 
 ## License
 
