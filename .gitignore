@@ -55,4 +55,9 @@ site/
 
 # Windows
 Thumbs.db
+
 *.pyc
+**/__pycache__/*
+
+
+run_inspector.sh
