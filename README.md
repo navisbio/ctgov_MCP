@@ -67,8 +67,12 @@ https://aact.ctti-clinicaltrials.org/users/sign_up
 
 ## Usage with Claude Desktop
 
+Add the server to your claude_desktop_config.json
+
+On macOS, the file is located at:
+/Users/YOUR_USERNAME/Library/Application Support/Claude/claude_desktop_config.json
+
 ```bash
-# Add the server to your claude_desktop_config.json
 "mcpServers": {
     "CTGOV-MCP": {
       "command": "uvx",
