@@ -53,11 +53,4 @@ async def test_execute_tool_append_landscape(tool_manager, mock_memo_manager):
     result = await tool_manager.execute_tool("append-landscape", {"finding": finding})
     mock_memo_manager.add_landscape_finding.assert_called_once_with(finding)
     assert isinstance(result[0], TextContent)
-    assert "Landscape finding added" in result[0].text
-
-async def test_execute_tool_append_metrics(tool_manager, mock_memo_manager):
-    metric = "New metric"
-    result = await tool_manager.execute_tool("append-metrics", {"metric": metric})
-    mock_memo_manager.add_metrics_finding.assert_called_once_with(metric)
-    assert isinstance(result[0], TextContent)
-    assert "Metric added" in result[0].text 
+    assert "Landscape finding added" in result[0].text 

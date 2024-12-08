@@ -27,14 +27,17 @@ def tool_manager(mock_db, memo_manager):
 
 @pytest.fixture
 def handlers(mock_db, memo_manager, tool_manager):
-    return MCPHandlers(mock_db)
+    return MCPHandlers(mock_db, schema={})
 
 async def test_list_resources(handlers):
     resources = await handlers.handle_list_resources()
     assert len(resources) == 2
     assert all(isinstance(r, Resource) for r in resources)
-    assert any(r.name == "Clinical Trial Landscape" for r in resources)
-    assert any(r.name == "Trial Metrics" for r in resources)
+    
+    # Get resource names for easier testing
+    resource_names = {r.name for r in resources}
+    assert "Clinical Trial Landscape" in resource_names
+    assert "AACT Database Schema" in resource_names
 
 async def test_call_tool_list_tables(handlers, mock_db):
     result = await handlers.handle_call_tool("list-tables", None)

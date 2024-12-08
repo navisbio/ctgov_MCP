@@ -5,6 +5,8 @@ import mcp.server.stdio
 from .database import AACTDatabase
 from .handlers import MCPHandlers
 from mcp.types import LoggingLevel, EmptyResult
+import json
+from pathlib import Path
 
 logger = logging.getLogger('mcp_aact_server')
 logger.setLevel(logging.DEBUG)
@@ -13,13 +15,19 @@ class AACTServer(Server):
     def __init__(self):
         super().__init__("aact-manager")
         self.db = AACTDatabase()
-        self.handlers = MCPHandlers(self.db)
+        
+        # Load the schema resource
+        schema_path = Path(__file__).parent / "resources" / "database_schema.json"
+        with open(schema_path) as f:
+            self.schema = json.load(f)
+        
+        # Pass schema to handlers
+        self.handlers = MCPHandlers(self.db, self.schema)
         self._register_handlers()
         
         # Set up logging handler that sends to MCP client
         self.log_handler = MCPLogHandler(self)
         logger.addHandler(self.log_handler)
-        logger.info("AACT Server initialized")
 
     def _register_handlers(self):
         @self.list_resources()

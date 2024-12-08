@@ -5,12 +5,14 @@ from pydantic import AnyUrl
 from .database import AACTDatabase
 from .memo_manager import MemoManager
 from .tools import ToolManager
+import json
 
 logger = logging.getLogger('mcp_aact_server.handlers')
 
 class MCPHandlers:
-    def __init__(self, db: AACTDatabase):
+    def __init__(self, db: AACTDatabase, schema: dict):
         self.db = db
+        self.schema = schema
         self.memo_manager = MemoManager()
         self.tool_manager = ToolManager(db, self.memo_manager)
         logger.info("MCPHandlers initialized")
@@ -25,10 +27,10 @@ class MCPHandlers:
                 mimeType="text/plain",
             ),
             types.Resource(
-                uri=AnyUrl("memo://metrics"),
-                name="Trial Metrics",
-                description="Quantitative metrics about trial phases, success rates, and temporal trends",
-                mimeType="text/plain",
+                uri=AnyUrl("schema://database"),
+                name="AACT Database Schema",
+                description="Complete schema information for all tables in the AACT database",
+                mimeType="application/json",
             )
         ]
         logger.debug(f"Returning {len(resources)} resources")
@@ -38,22 +40,27 @@ class MCPHandlers:
         logger.info(f"Handling read_resource request for URI: {uri}")
         
         try:
-            if uri.scheme != "memo":
-                logger.error(f"Unsupported URI scheme: {uri.scheme}")
-                raise ValueError(f"Unsupported URI scheme: {uri.scheme}")
+            scheme = uri.scheme
+            if scheme not in ["memo", "schema"]:
+                logger.error(f"Unsupported URI scheme: {scheme}")
+                raise ValueError(f"Unsupported URI scheme: {scheme}")
 
+            if scheme == "schema":
+                path = str(uri).replace("schema://", "")
+                if path == "database":
+                    return json.dumps(self.schema, indent=2)
+                else:
+                    logger.error(f"Unknown schema resource: {path}")
+                    raise ValueError(f"Unknown schema resource: {path}")
+                
             path = str(uri).replace("memo://", "")
             if not path:
                 logger.error("Empty resource path")
                 raise ValueError("Empty resource path")
 
             logger.debug(f"Reading resource for path: {path}")
-            if path == "insights":
-                return self.memo_manager.get_insights_memo()
-            elif path == "landscape":
+            if path == "landscape":
                 return self.memo_manager.get_landscape_memo()
-            elif path == "metrics":
-                return self.memo_manager.get_metrics_memo()
             else:
                 logger.error(f"Unknown resource path: {path}")
                 raise ValueError(f"Unknown resource path: {path}")
