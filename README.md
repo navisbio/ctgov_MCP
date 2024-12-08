@@ -77,7 +77,7 @@ On macOS, the file is located at:
     "CTGOV-MCP": {
       "command": "uvx",
       "args": [
-        "amcp-server-aact"
+        "mcp-server-aact"
       ],
       "env": {
         "DB_USER": USERNAME,
