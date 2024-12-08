@@ -74,17 +74,26 @@ Analysis Memos:
 ---
 
 **Analysis Process:**
-1. Define specific research questions
-2. Develop SQL queries
-3. Analyze patterns and trends
-4. Create visualizations
-5. Document insights
-6. Present recommendations
+1. Explore available data
+   - Examine relevant tables and their relationships
+   - Identify key data points available
+   - Assess data completeness
 
----
+2. Initial consultation
+   - Share preliminary findings with user
+   - Discuss potential analysis directions
+   - Align on priorities
 
-To begin the analysis and before you start with a dashboard, please ask the user a very concise question whether they are interested in:
-1. Industry-sponsored trials
-2. Academic/investigator-initiated trials
-3. All trials combined
+3. Detailed analysis
+   - Execute targeted queries
+   - Create visualizations
+   - Document insights
+
+4. Recommendations
+   - Summarize key findings
+   - Suggest next steps
+
+To begin the analysis, first explore the available data relevant to the topic and share what you find with the user. Then, discuss potential directions for deeper analysis based on their specific interests and the available data.
+
+IMPORTANT: NEVER USE PLACEHOLDER DATA OR ESTIMATES. EVERY NUMBER YOU USE MUST BE BASED ON THE DATABASE UNLESS THE USER EXPLICITLY STATES OTHERWISE.
 """
