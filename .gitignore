@@ -60,4 +60,4 @@ Thumbs.db
 **/__pycache__/*
 
 
-run_inspector.sh
+tests/__pycache__/*

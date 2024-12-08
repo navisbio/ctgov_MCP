@@ -6,7 +6,6 @@ class MemoManager:
     def __init__(self):
         self.insights: list[str] = []
         self.landscape_findings: list[str] = []
-        self.metrics_findings: list[str] = []
         logger.info("MemoManager initialized")
 
     def add_landscape_finding(self, finding: str) -> None:

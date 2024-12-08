@@ -13,7 +13,6 @@ Database Tools:
 
 Analysis Memos:
 - memo://landscape: Key findings, patterns, qualitative insights, and trial references
-- memo://metrics: Quantitative metrics and statistical analysis
 </mcp>
 
 ---
@@ -28,16 +27,7 @@ Analysis Memos:
 
 **Data Management Guidelines:**
 1. Use the complete AACT dataset (no sampling)
-2. Store trial references in CSV format with the following fields:
-   - NCT_ID
-   - Trial Title
-   - Sponsor Name
-   - Indication/Condition
-   - Phase
-   - Start Date
-   - Status
-   - Completion Date
-   - *(Additional fields may be added based on analysis needs)*
+2. Always make sure you also included synonyms for the condition/indication/intervention/sponsor/investigator/site fields
 
 ---
 
