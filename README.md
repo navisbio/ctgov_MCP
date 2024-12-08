@@ -67,10 +67,9 @@ https://aact.ctti-clinicaltrials.org/users/sign_up
 
 ## Usage with Claude Desktop
 
-Add the server to your claude_desktop_config.json
+Note that you need Claude Desktop and a Claude subscription at the moment. 
 
-On macOS, the file is located at:
-/Users/YOUR_USERNAME/Library/Application Support/Claude/claude_desktop_config.json
+Add the following lines to the file claude_desktop_config.json. (On macOS, the file is located at /Users/YOUR_USERNAME/Library/Application Support/Claude/claude_desktop_config.json and you will need to create it yourself if it does not exist yet).
 
 ```bash
 "mcpServers": {
