@@ -6,6 +6,7 @@ from .database import AACTDatabase
 from .memo_manager import MemoManager
 from .tools import ToolManager
 import json
+from .resources import get_resources
 
 logger = logging.getLogger('mcp_aact_server.handlers')
 
@@ -19,20 +20,7 @@ class MCPHandlers:
 
     async def handle_list_resources(self) -> list[types.Resource]:
         logger.debug("Handling list_resources request")
-        resources = [
-            types.Resource(
-                uri=AnyUrl("memo://landscape"),
-                name="Clinical Trial Landscape",
-                description="Key findings about trial patterns, sponsor activity, and development trends",
-                mimeType="text/plain",
-            ),
-            types.Resource(
-                uri=AnyUrl("schema://database"),
-                name="AACT Database Schema",
-                description="Complete schema information for all tables in the AACT database",
-                mimeType="application/json",
-            )
-        ]
+        resources = get_resources()
         logger.debug(f"Returning {len(resources)} resources")
         return resources
 
