@@ -48,24 +48,13 @@ class ToolManager:
             ),
             types.Tool(
                 name="append-landscape",
-                description="Add findings about trial patterns and development trends",
+                description="Add findings and insights related to the analysis question to the memo",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "finding": {"type": "string", "description": "Analysis finding about trial patterns or trends"},
                     },
                     "required": ["finding"],
-                },
-            ),
-            types.Tool(
-                name="append-metrics",
-                description="Add quantitative metrics about trials",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "metric": {"type": "string", "description": "Quantitative metric or statistical finding"},
-                    },
-                    "required": ["metric"],
                 },
             ),
         ]
@@ -133,15 +122,6 @@ class ToolManager:
                 logger.info("Landscape finding added successfully")
                 return [types.TextContent(type="text", text="Landscape finding added")]
 
-            elif name == "append-metrics":
-                if "metric" not in arguments:
-                    logger.error("Missing metric argument for append-metrics")
-                    raise ValueError("Missing metric argument")
-                
-                logger.debug(f"Adding metric: {arguments['metric'][:50]}...")
-                self.memo_manager.add_metrics_finding(arguments["metric"])
-                logger.info("Metric added successfully")
-                return [types.TextContent(type="text", text="Metric added")]
 
         except Exception as e:
             logger.error(f"Error executing tool {name}: {str(e)}", exc_info=True)
