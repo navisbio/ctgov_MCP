@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "database": "openFDA",
+  "endpoints": {
+    "drugsfda": {
+      "description": "Drug product labeling and approval information",
+      "fields": {
+        "application_number": "Application number (NDA, ANDA, or BLA)",
+        "sponsor_name": "Name of the company that sponsors the application",
+        "openfda": {
+          "brand_name": "Brand name of the drug product",
+          "generic_name": "Generic name of the drug product",
+          "manufacturer_name": "Name of the manufacturer",
+          "product_type": "Type of the product (e.g., HUMAN OTC DRUG, HUMAN PRESCRIPTION DRUG)",
+          "route": "Route of administration",
+          "substance_name": "Active ingredient name",
+          "spl_id": "Structured Product Labeling ID",
+          "spl_set_id": "SPL set ID",
+          "package_ndc": "National Drug Code for the package",
+          "product_ndc": "National Drug Code for the product",
+          "rxcui": "RxNorm Concept Unique Identifier"
+        }
+      }
+    },
+    "label": {
+      "description": "Structured Product Labeling (SPL) data",
+      "fields": {
+        "id": "Document ID",
+        "set_id": "Set ID for the labeling",
+        "effective_time": "Effective date of the labeling",
+        "version": "Version number of the labeling",
+        "drug_interactions": "Drug interaction information",
+        "indications_and_usage": "Approved indications and usage",
+        "warnings": "Warning information",
+        "dosage_and_administration": "Dosing information",
+        "contraindications": "Contraindication information"
+      }
+    },
+    "ndc": {
+      "description": "National Drug Code Directory",
+      "fields": {
+        "product_ndc": "National Drug Code for the product",
+        "product_type": "Type of the product",
+        "generic_name": "Generic name of the drug product",
+        "brand_name": "Brand name of the drug product",
+        "route": "Route of administration",
+        "marketing_status": "Marketing status of the product",
+        "active_ingredients": "List of active ingredients",
+        "packaging": "Packaging information"
+      }
+    },
+    "enforcement": {
+      "description": "Drug recall enforcement reports",
+      "fields": {
+        "recall_number": "Recall identification number",
+        "reason_for_recall": "Reason for the recall",
+        "status": "Status of the recall",
+        "classification": "Classification of the recall",
+        "product_description": "Description of the affected product",
+        "code_info": "Product code information",
+        "recalling_firm": "Name of the recalling firm",
+        "voluntary_mandated": "Whether recall was voluntary or mandated",
+        "initial_firm_notification": "How firm notified public"
+      }
+    }
+  }
+}

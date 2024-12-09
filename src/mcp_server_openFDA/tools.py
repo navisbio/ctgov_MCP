@@ -1,6 +1,8 @@
 import logging
 from typing import Any
 import mcp.types as types
+import aiohttp
+import json
 from .database import AACTDatabase
 from .memo_manager import MemoManager
 
@@ -10,6 +12,8 @@ class ToolManager:
     def __init__(self, db: AACTDatabase, memo_manager: MemoManager):
         self.db = db
         self.memo_manager = memo_manager
+        self.base_url = "https://api.fda.gov/drug"
+        self.api_key = None
         logger.info("ToolManager initialized")
 
     def get_available_tools(self) -> list[types.Tool]:
@@ -18,18 +22,19 @@ class ToolManager:
         tools = [
             types.Tool(
                 name="read-query",
-                description="Execute a SELECT query on the AACT clinical trials database",
+                description="Execute a query on the OpenFDA API for drug information",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "query": {"type": "string", "description": "SELECT SQL query to execute"},
+                        "query": {"type": "string", "description": "OpenFDA API search query"},
+                        "endpoint": {"type": "string", "description": "API endpoint (e.g., drugsfda, label, ndc)", "default": "drugsfda"}
                     },
                     "required": ["query"],
                 },
             ),
             types.Tool(
                 name="list-tables",
-                description="List all tables in the AACT database",
+                description="List all available OpenFDA drug endpoints",
                 inputSchema={
                     "type": "object",
                     "properties": {},
@@ -37,22 +42,22 @@ class ToolManager:
             ),
             types.Tool(
                 name="describe-table",
-                description="Get the schema information for a specific table in AACT",
+                description="Get the available fields for a specific OpenFDA endpoint",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "table_name": {"type": "string", "description": "Name of the table to describe"},
+                        "table_name": {"type": "string", "description": "Name of the endpoint to describe (e.g., drugsfda, label, ndc)"},
                     },
                     "required": ["table_name"],
                 },
             ),
             types.Tool(
                 name="append-landscape",
-                description="Add findings and insights related to the analysis question to the memo",
+                description="Add findings and insights related to the drug analysis to the memo",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "finding": {"type": "string", "description": "Analysis finding about trial patterns or trends"},
+                        "finding": {"type": "string", "description": "Analysis finding about drug patterns or trends"},
                     },
                     "required": ["finding"],
                 },
@@ -75,42 +80,36 @@ class ToolManager:
                 raise ValueError("Missing required arguments")
 
             if name == "list-tables":
-                logger.debug("Executing list-tables query")
-                results = self.db.execute_query("""
-                    SELECT table_name 
-                    FROM information_schema.tables 
-                    WHERE table_schema = 'ctgov'
-                    ORDER BY table_name;
-                """)
-                logger.info(f"Retrieved {len(results)} tables")
-                return [types.TextContent(type="text", text=str(results))]
+                endpoints = [
+                    "drugsfda", "label", "ndc", "enforcement", 
+                    "event", "recall"
+                ]
+                return [types.TextContent(type="text", text=str(endpoints))]
 
             elif name == "describe-table":
-                if "table_name" not in arguments:
-                    logger.error("Missing table_name argument for describe-table")
-                    raise ValueError("Missing table_name argument")
-                
-                logger.debug(f"Describing table: {arguments['table_name']}")
-                results = self.db.execute_query("""
-                    SELECT column_name, data_type, character_maximum_length
-                    FROM information_schema.columns
-                    WHERE table_schema = 'ctgov' 
-                    AND table_name = %s
-                    ORDER BY ordinal_position;
-                """, {"table_name": arguments["table_name"]})
-                logger.info(f"Retrieved {len(results)} columns for table {arguments['table_name']}")
-                return [types.TextContent(type="text", text=str(results))]
+                endpoint_fields = {
+                    "drugsfda": ["application_number", "sponsor_name", "products"],
+                    "label": ["id", "effective_time", "drug_interactions"],
+                    "ndc": ["product_ndc", "generic_name", "brand_name"],
+                }
+                table_name = arguments.get("table_name")
+                if table_name not in endpoint_fields:
+                    raise ValueError(f"Unknown endpoint: {table_name}")
+                return [types.TextContent(type="text", text=str(endpoint_fields[table_name]))]
 
             elif name == "read-query":
+                endpoint = arguments.get("endpoint", "drugsfda")
                 query = arguments.get("query", "").strip()
-                if not query.upper().startswith("SELECT"):
-                    logger.error(f"Invalid query type attempted: {query[:50]}...")
-                    raise ValueError("Only SELECT queries are allowed for read-query")
                 
-                logger.debug(f"Executing query: {query}")
-                results = self.db.execute_query(query)
-                logger.info(f"Query returned {len(results)} rows")
-                return [types.TextContent(type="text", text=str(results))]
+                async with aiohttp.ClientSession() as session:
+                    url = f"{self.base_url}/{endpoint}.json?search={query}"
+                    async with session.get(url) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            return [types.TextContent(type="text", text=json.dumps(data, indent=2))]
+                        else:
+                            error_msg = await response.text()
+                            raise ValueError(f"API request failed: {error_msg}")
 
             elif name == "append-landscape":
                 if "finding" not in arguments:
@@ -121,7 +120,6 @@ class ToolManager:
                 self.memo_manager.add_landscape_finding(arguments["finding"])
                 logger.info("Landscape finding added successfully")
                 return [types.TextContent(type="text", text="Landscape finding added")]
-
 
         except Exception as e:
             logger.error(f"Error executing tool {name}: {str(e)}", exc_info=True)
