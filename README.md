@@ -6,14 +6,14 @@ A Model Context Protocol (MCP) server implementation that provides access to the
 ## Components
 
 ### Resources
-The server exposes three dynamic resources:
+The server exposes a dynamic resources to store analysis results:
 - `memo://landscape`: Key findings about trial patterns, sponsor activity, and development trends
-- `memo://metrics`: Quantitative metrics about trial phases, success rates, and temporal trends
+
 
 ### Prompts
 The server provides an analytical prompt:
 - `indication-landscape`: Interactive prompt that analyzes clinical trial patterns
-  - Required argument: `topic` - The therapeutic area to analyze (e.g., "multiple sclerosis", "breast cancer")
+  - Required argument: `topic` - The therapeutic area or topic to analyze (e.g., "multiple sclerosis", "biomarkers used in breast cancer", ...)
   - Analyzes trial patterns and development trends
   - Examines competitive dynamics
   - Integrates findings with the landscape and metrics memos
