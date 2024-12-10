@@ -8,18 +8,12 @@ class ResourceDefinition(TypedDict):
     description: str
     mimeType: str
 
-AACT_RESOURCES: list[ResourceDefinition] = [
+OPENFDA_RESOURCES: list[ResourceDefinition] = [
     {
         "uri": "memo://landscape",
-        "name": "Clinical Trial Landscape",
-        "description": "Key findings about trial patterns, sponsor activity, and development trends",
+        "name": "Drug Insights Landscape",
+        "description": "Key findings about drug safety, labeling, and adverse events from OpenFDA data",
         "mimeType": "text/plain",
-    },
-    {
-        "uri": "schema://database",
-        "name": "AACT Database Schema",
-        "description": "Complete schema information for all tables in the AACT database",
-        "mimeType": "application/json",
     }
 ]
 
@@ -31,5 +25,5 @@ def get_resources() -> list[types.Resource]:
             description=resource["description"],
             mimeType=resource["mimeType"],
         )
-        for resource in AACT_RESOURCES
-    ] 
+        for resource in OPENFDA_RESOURCES
+    ]    

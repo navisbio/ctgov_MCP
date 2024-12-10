@@ -3,6 +3,7 @@ from typing import Any
 import mcp.types as types
 from .openfda_client import OpenFDAClient
 from .memo_manager import MemoManager
+import json
 
 logger = logging.getLogger('mcp_openfda_server.tools')
 
