@@ -18,8 +18,8 @@ def get_db_connection():
         raise ValueError("DB_USER and DB_PASSWORD environment variables must be set")
     
     return psycopg2.connect(
-        host="aact-db.ctti-clinicaltrials.org",
-        database="aact",
+        host="openfda-db.ctti-clinicaltrials.org",
+        database="openfda",
         user=user,
         password=password
     )
@@ -46,12 +46,12 @@ def get_schema_info() -> dict[str, Any]:
             
             return {
                 "schema_version": "1.0",
-                "database": "aact",
+                "database": "openfda",
                 "tables": tables
             }
 
 def main():
-    resource_dir = Path(__file__).parent.parent / "src" / "mcp_server_aact" / "resources"
+    resource_dir = Path(__file__).parent.parent / "src" / "mcp_server_openFDA" / "resources"
     resource_dir.mkdir(parents=True, exist_ok=True)
     
     schema = get_schema_info()

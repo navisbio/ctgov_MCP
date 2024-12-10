@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.getLogger('mcp_aact_server.memo_manager')
+logger = logging.getLogger('mcp_openfda_server.memo_manager')
 
 class MemoManager:
     def __init__(self):

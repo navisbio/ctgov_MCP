@@ -2,16 +2,16 @@ import logging
 from typing import Any
 import mcp.types as types
 from pydantic import AnyUrl
-from .database import AACTDatabase
+from .database import OpenFDADatabase
 from .memo_manager import MemoManager
 from .tools import ToolManager
 import json
 from .resources import get_resources
 
-logger = logging.getLogger('mcp_aact_server.handlers')
+logger = logging.getLogger('mcp_openfda_server.handlers')
 
 class MCPHandlers:
-    def __init__(self, db: AACTDatabase, schema: dict):
+    def __init__(self, db: OpenFDADatabase, schema: dict):
         self.db = db
         self.schema = schema
         self.memo_manager = MemoManager()

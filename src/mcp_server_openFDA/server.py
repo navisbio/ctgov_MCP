@@ -2,19 +2,19 @@ import logging
 from mcp.server import Server, NotificationOptions, RequestContext
 from mcp.server.models import InitializationOptions
 import mcp.server.stdio
-from .database import AACTDatabase
+from .database import OpenFDADatabase
 from .handlers import MCPHandlers
 from mcp.types import LoggingLevel, EmptyResult
 import json
 from pathlib import Path
 
-logger = logging.getLogger('mcp_aact_server')
+logger = logging.getLogger('mcp_openfda_server')
 logger.setLevel(logging.DEBUG)
 
-class AACTServer(Server):
+class OpenFDAServer(Server):
     def __init__(self):
-        super().__init__("aact-manager")
-        self.db = AACTDatabase()
+        super().__init__("openfda-manager")
+        self.db = OpenFDADatabase()
         
         # Load the schema resource
         schema_path = Path(__file__).parent / "resources" / "database_schema.json"
@@ -58,7 +58,7 @@ class AACTServer(Server):
         async def handle_set_logging_level(level: LoggingLevel) -> EmptyResult:
             """Handle requests to change the logging level"""
             logger.info(f"Setting logging level to {level}")
-            logging.getLogger('mcp_aact_server').setLevel(level.upper())
+            logging.getLogger('mcp_openfda_server').setLevel(level.upper())
             
             # Send confirmation through the session
             if hasattr(self, 'request_context') and self.request_context:
@@ -87,14 +87,14 @@ class MCPLogHandler(logging.Handler):
 
 async def main():
     try:
-        server = AACTServer()
+        server = OpenFDAServer()
         
         async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
             await server.run(
                 read_stream,
                 write_stream,
                 InitializationOptions(
-                    server_name="aact",
+                    server_name="openfda",
                     server_version="0.1.0",
                     capabilities=server.get_capabilities(
                         notification_options=NotificationOptions(),

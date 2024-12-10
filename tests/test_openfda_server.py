@@ -1,15 +1,15 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
-from mcp_server_aact.database import AACTDatabase
-from mcp_server_aact.handlers import MCPHandlers
-from mcp_server_aact.memo_manager import MemoManager
-from mcp_server_aact.tools import ToolManager
+from mcp_server_openFDA.database import OpenFDADatabase
+from mcp_server_openFDA.handlers import MCPHandlers
+from mcp_server_openFDA.memo_manager import MemoManager
+from mcp_server_openFDA.tools import ToolManager
 from mcp.types import Resource, Tool, Prompt, GetPromptResult, PromptMessage, TextContent
 from pydantic import AnyUrl
 
 @pytest.fixture
 def mock_db():
-    mock = Mock(spec=AACTDatabase)
+    mock = Mock(spec=OpenFDADatabase)
     # Set up mock responses
     mock.execute_query.return_value = [
         {"table_name": "studies"},

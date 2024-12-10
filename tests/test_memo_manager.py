@@ -1,5 +1,5 @@
 import pytest
-from mcp_server_aact.memo_manager import MemoManager
+from mcp_server_openFDA.memo_manager import MemoManager
 
 @pytest.fixture
 def memo_manager():

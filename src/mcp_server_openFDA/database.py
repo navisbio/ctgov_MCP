@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import json
 import datetime
 
-logger = logging.getLogger('mcp_aact_server.database')
+logger = logging.getLogger('mcp_openfda_server.database')
 
 class DateEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -16,7 +16,7 @@ class DateEncoder(json.JSONEncoder):
             return obj.isoformat()
         return super().default(obj)
 
-class AACTDatabase:
+class OpenFDADatabase:
     def __init__(self):
         logger.info("Initializing AACT database connection")
         load_dotenv()

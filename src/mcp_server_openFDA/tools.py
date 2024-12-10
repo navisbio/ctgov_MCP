@@ -3,13 +3,13 @@ from typing import Any
 import mcp.types as types
 import aiohttp
 import json
-from .database import AACTDatabase
+from .database import OpenFDADatabase
 from .memo_manager import MemoManager
 
-logger = logging.getLogger('mcp_aact_server.tools')
+logger = logging.getLogger('mcp_openfda_server.tools')
 
 class ToolManager:
-    def __init__(self, db: AACTDatabase, memo_manager: MemoManager):
+    def __init__(self, db: OpenFDADatabase, memo_manager: MemoManager):
         self.db = db
         self.memo_manager = memo_manager
         self.base_url = "https://api.fda.gov/drug"

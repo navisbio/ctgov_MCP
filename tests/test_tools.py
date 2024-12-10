@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mcp_server_aact.tools import ToolManager
+from mcp_server_openFDA.tools import ToolManager
 from mcp.types import TextContent, Tool
 
 @pytest.fixture
