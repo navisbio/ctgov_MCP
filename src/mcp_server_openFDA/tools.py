@@ -1,19 +1,15 @@
 import logging
 from typing import Any
 import mcp.types as types
-import aiohttp
-import json
-from .database import OpenFDADatabase
+from .openfda_client import OpenFDAClient
 from .memo_manager import MemoManager
 
 logger = logging.getLogger('mcp_openfda_server.tools')
 
 class ToolManager:
-    def __init__(self, db: OpenFDADatabase, memo_manager: MemoManager):
-        self.db = db
+    def __init__(self, openfda_client: OpenFDAClient, memo_manager: MemoManager):
+        self.client = openfda_client
         self.memo_manager = memo_manager
-        self.base_url = "https://api.fda.gov/drug"
-        self.api_key = None
         logger.info("ToolManager initialized")
 
     def get_available_tools(self) -> list[types.Tool]:
@@ -101,15 +97,9 @@ class ToolManager:
                 endpoint = arguments.get("endpoint", "drugsfda")
                 query = arguments.get("query", "").strip()
                 
-                async with aiohttp.ClientSession() as session:
-                    url = f"{self.base_url}/{endpoint}.json?search={query}"
-                    async with session.get(url) as response:
-                        if response.status == 200:
-                            data = await response.json()
-                            return [types.TextContent(type="text", text=json.dumps(data, indent=2))]
-                        else:
-                            error_msg = await response.text()
-                            raise ValueError(f"API request failed: {error_msg}")
+                # Use the OpenFDA client from our database object
+                result = await self.db.execute_query(query, {"endpoint": endpoint})
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
             elif name == "append-landscape":
                 if "finding" not in arguments:
@@ -124,4 +114,3 @@ class ToolManager:
         except Exception as e:
             logger.error(f"Error executing tool {name}: {str(e)}", exc_info=True)
             raise
- 

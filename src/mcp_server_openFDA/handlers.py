@@ -2,7 +2,7 @@ import logging
 from typing import Any
 import mcp.types as types
 from pydantic import AnyUrl
-from .database import OpenFDADatabase
+from .openfda_client import OpenFDAClient
 from .memo_manager import MemoManager
 from .tools import ToolManager
 import json
@@ -11,11 +11,11 @@ from .resources import get_resources
 logger = logging.getLogger('mcp_openfda_server.handlers')
 
 class MCPHandlers:
-    def __init__(self, db: OpenFDADatabase, schema: dict):
-        self.db = db
+    def __init__(self, client: OpenFDAClient, schema: dict):
+        self.client = client
         self.schema = schema
         self.memo_manager = MemoManager()
-        self.tool_manager = ToolManager(db, self.memo_manager)
+        self.tool_manager = ToolManager(client, self.memo_manager)
         logger.info("MCPHandlers initialized")
 
     async def handle_list_resources(self) -> list[types.Resource]:

@@ -2,7 +2,9 @@ import logging
 from mcp.server import Server, NotificationOptions, RequestContext
 from mcp.server.models import InitializationOptions
 import mcp.server.stdio
-from .database import OpenFDADatabase
+from .openfda_client import OpenFDAClient  # Replace database import
+
+
 from .handlers import MCPHandlers
 from mcp.types import LoggingLevel, EmptyResult
 import json
@@ -14,15 +16,15 @@ logger.setLevel(logging.DEBUG)
 class OpenFDAServer(Server):
     def __init__(self):
         super().__init__("openfda-manager")
-        self.db = OpenFDADatabase()
+        self.client = OpenFDAClient()  # Replace self.db initialization
         
         # Load the schema resource
         schema_path = Path(__file__).parent / "resources" / "database_schema.json"
         with open(schema_path) as f:
             self.schema = json.load(f)
         
-        # Pass schema to handlers
-        self.handlers = MCPHandlers(self.db, self.schema)
+        # Pass client instead of db to handlers
+        self.handlers = MCPHandlers(self.client, self.schema)
         self._register_handlers()
         
         # Set up logging handler that sends to MCP client
@@ -105,3 +107,6 @@ async def main():
     except Exception as e:
         logger.error(f"Server error: {str(e)}", exc_info=True)
         raise
+    finally:
+        if hasattr(server, 'client'):
+            await server.client.close()
