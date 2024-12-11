@@ -56,54 +56,54 @@ class MCPHandlers:
             logger.error(f"Error reading resource: {str(e)}", exc_info=True)
             raise
 
-    async def handle_list_prompts(self) -> list[types.Prompt]:
-        logger.debug("Handling list_prompts request")
-        prompts = [
-            types.Prompt(
-                name="indication-landscape",
-                description="Analyzes clinical trial patterns, development trends, and competitive dynamics within specific therapeutic areas",
-                arguments=[
-                    types.PromptArgument(
-                        name="topic",
-                        description="Therapeutic area or indication to analyze (e.g., 'multiple sclerosis', 'breast cancer')",
-                        required=True,
-                    )
-                ],
-            )
-        ]
-        logger.debug(f"Returning {len(prompts)} prompts")
-        return prompts
+    # async def handle_list_prompts(self) -> list[types.Prompt]:
+    #     logger.debug("Handling list_prompts request")
+    #     prompts = [
+    #         types.Prompt(
+    #             name="indication-landscape",
+    #             description="Analyzes clinical trial patterns, development trends, and competitive dynamics within specific therapeutic areas",
+    #             arguments=[
+    #                 types.PromptArgument(
+    #                     name="topic",
+    #                     description="Therapeutic area or indication to analyze (e.g., 'multiple sclerosis', 'breast cancer')",
+    #                     required=True,
+    #                 )
+    #             ],
+    #         )
+    #     ]
+    #     logger.debug(f"Returning {len(prompts)} prompts")
+    #     return prompts
 
-    async def handle_get_prompt(self, name: str, arguments: dict[str, str] | None) -> types.GetPromptResult:
-        logger.info(f"Handling get_prompt request for {name} with args {arguments}")
+    # async def handle_get_prompt(self, name: str, arguments: dict[str, str] | None) -> types.GetPromptResult:
+    #     logger.info(f"Handling get_prompt request for {name} with args {arguments}")
         
-        try:
-            from .prompts import PROMPT_TEMPLATE
+    #     try:
+    #         from .prompts import PROMPT_TEMPLATE
             
-            if name != "indication-landscape":
-                logger.error(f"Unknown prompt: {name}")
-                raise ValueError(f"Unknown prompt: {name}")
+    #         if name != "indication-landscape":
+    #             logger.error(f"Unknown prompt: {name}")
+    #             raise ValueError(f"Unknown prompt: {name}")
 
-            if not arguments or "topic" not in arguments:
-                logger.error("Missing required argument: topic")
-                raise ValueError("Missing required argument: topic")
+    #         if not arguments or "topic" not in arguments:
+    #             logger.error("Missing required argument: topic")
+    #             raise ValueError("Missing required argument: topic")
 
-            topic = arguments["topic"]
-            logger.debug(f"Generating prompt for topic: {topic}")
-            prompt = PROMPT_TEMPLATE.format(topic=topic)
+    #         topic = arguments["topic"]
+    #         logger.debug(f"Generating prompt for topic: {topic}")
+    #         prompt = PROMPT_TEMPLATE.format(topic=topic)
 
-            return types.GetPromptResult(
-                description=f"Clinical trial landscape analysis for {topic}",
-                messages=[
-                    types.PromptMessage(
-                        role="user",
-                        content=types.TextContent(type="text", text=prompt.strip()),
-                    )
-                ],
-            )
-        except Exception as e:
-            logger.error(f"Error getting prompt: {str(e)}", exc_info=True)
-            raise
+    #         return types.GetPromptResult(
+    #             description=f"Clinical trial landscape analysis for {topic}",
+    #             messages=[
+    #                 types.PromptMessage(
+    #                     role="user",
+    #                     content=types.TextContent(type="text", text=prompt.strip()),
+    #                 )
+    #             ],
+    #         )
+    #     except Exception as e:
+    #         logger.error(f"Error getting prompt: {str(e)}", exc_info=True)
+    #         raise
 
     async def handle_list_tools(self) -> list[types.Tool]:
         logger.debug("Handling list_tools request")

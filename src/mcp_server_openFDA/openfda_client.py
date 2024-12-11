@@ -75,3 +75,39 @@ class OpenFDAClient:
         if self.session:
             await self.session.close()
             self.session = None
+
+    async def execute_query(
+        self, 
+        endpoint: str,
+        search_query: str = None,
+        count: str = None,
+        sort: str = None,
+        limit: int = 1
+    ) -> Dict[str, Any]:
+        """Execute a query against OpenFDA API with comprehensive syntax support
+        
+        Args:
+            endpoint: API endpoint (e.g., drug/event)
+            search_query: Search query with field:term syntax, supports AND/OR operations
+            count: Field to count unique values
+            sort: Field and direction for sorting (e.g., receivedate:desc)
+            limit: Maximum number of results
+            
+        Returns:
+            Query results from OpenFDA
+        """
+        params = {}
+        
+        if search_query:
+            params['search'] = search_query
+        
+        if count:
+            params['count'] = count
+            
+        if sort:
+            params['sort'] = sort
+            
+        if limit and not count:
+            params['limit'] = limit
+
+        return await self._make_request(f'/{endpoint}.json', params)
