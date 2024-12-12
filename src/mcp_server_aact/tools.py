@@ -18,7 +18,7 @@ class ToolManager:
         tools = [
             types.Tool(
                 name="read-query",
-                description="Execute a SELECT query on the AACT clinical trials database",
+                description="Execute a SELECT query on the AACT clinical trials database. Use this tool to extract and analyze specific data from any table.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -29,7 +29,7 @@ class ToolManager:
             ),
             types.Tool(
                 name="list-tables",
-                description="List all tables in the AACT database",
+                description="Get an overview of all available tables in the AACT database. This tool helps you understand the database structure before starting your analysis to identify relevant data sources.",
                 inputSchema={
                     "type": "object",
                     "properties": {},
@@ -37,7 +37,7 @@ class ToolManager:
             ),
             types.Tool(
                 name="describe-table",
-                description="Get the schema information for a specific table in AACT",
+                description="Examine the detailed structure of a specific AACT table, including column names and data types. Use this before querying to ensure you target the right columns and understand the data format.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -45,10 +45,9 @@ class ToolManager:
                     },
                     "required": ["table_name"],
                 },
-            ),
-            types.Tool(
+            ),            types.Tool(
                 name="append-landscape",
-                description="Add findings and insights related to the analysis question to the memo",
+                description="Record key findings and insights discovered during your analysis. Use this tool whenever you uncover meaningful patterns, trends, or notable observations about clinical trials. This helps build a comprehensive analytical narrative and ensures important discoveries are documented.",
                 inputSchema={
                     "type": "object",
                     "properties": {
