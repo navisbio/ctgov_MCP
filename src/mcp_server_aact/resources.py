@@ -12,17 +12,16 @@ AACT_RESOURCES: list[ResourceDefinition] = [
     {
         "uri": "memo://landscape",
         "name": "Clinical Trial Landscape",
-        "description": "Key findings about trial patterns, sponsor activity, and development trends",
+        "description": "Comprehensive analysis repository capturing key findings about clinical trial patterns, sponsor activities, development trends, and competitive dynamics. This living document grows with each discovered insight to build a complete therapeutic landscape overview.",
         "mimeType": "text/plain",
     },
     {
         "uri": "schema://database",
         "name": "AACT Database Schema",
-        "description": "Complete schema information for all tables in the AACT database",
+        "description": "Detailed structural information about the AACT database, including table relationships, column definitions, and data types. Essential reference for understanding data organization and planning effective queries.",
         "mimeType": "application/json",
     }
 ]
-
 def get_resources() -> list[types.Resource]:
     return [
         types.Resource(
