@@ -42,22 +42,12 @@ The server offers several core tools:
 
 #### Analysis Tools
 - `append-insight`
-   - Add new business insights to the insights memo
-   - Input:
-     - `insight` (string): Business insight discovered from data analysis
-   - Returns: Confirmation of insight addition
-
-- `append-landscape`
-   - Add findings about trial patterns and development trends
+   - Add new business insights about trial patterns, development trends, or other parts of the analysis
    - Input:
      - `finding` (string): Analysis finding about trial patterns or trends
-   - Returns: Confirmation of finding addition
+   - Returns: Confirmation of insight addition
 
-- `append-metrics`
-   - Add quantitative metrics about trials
-   - Input:
-     - `metric` (string): Quantitative metric or statistical finding
-   - Returns: Confirmation of metric addition
+
 
 ## Create an Account to Access the Database
 

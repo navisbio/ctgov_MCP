@@ -47,8 +47,8 @@ class MCPHandlers:
                 raise ValueError("Empty resource path")
 
             logger.debug(f"Reading resource for path: {path}")
-            if path == "landscape":
-                return self.memo_manager.get_landscape_memo()
+            if path == "insights":
+                return self.memo_manager.get_insights_memo()
             else:
                 logger.error(f"Unknown resource path: {path}")
                 raise ValueError(f"Unknown resource path: {path}")

@@ -45,8 +45,9 @@ class ToolManager:
                     },
                     "required": ["table_name"],
                 },
-            ),            types.Tool(
-                name="append-landscape",
+            ),            
+            types.Tool(
+                name="append-insight",
                 description="Record key findings and insights discovered during your analysis. Use this tool whenever you uncover meaningful patterns, trends, or notable observations about clinical trials. This helps build a comprehensive analytical narrative and ensures important discoveries are documented.",
                 inputSchema={
                     "type": "object",
@@ -111,15 +112,15 @@ class ToolManager:
                 logger.info(f"Query returned {len(results)} rows")
                 return [types.TextContent(type="text", text=str(results))]
 
-            elif name == "append-landscape":
+            elif name == "append-insight":
                 if "finding" not in arguments:
-                    logger.error("Missing finding argument for append-landscape")
+                    logger.error("Missing finding argument for append-insight")
                     raise ValueError("Missing finding argument")
                 
-                logger.debug(f"Adding landscape finding: {arguments['finding'][:50]}...")
-                self.memo_manager.add_landscape_finding(arguments["finding"])
+                logger.debug(f"Adding insight: {arguments['finding'][:50]}...")
+                self.memo_manager.add_insights(arguments["finding"])
                 logger.info("Landscape finding added successfully")
-                return [types.TextContent(type="text", text="Landscape finding added")]
+                return [types.TextContent(type="text", text="Insight added")]
 
 
         except Exception as e:

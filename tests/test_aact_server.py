@@ -36,7 +36,7 @@ async def test_list_resources(handlers):
     
     # Get resource names for easier testing
     resource_names = {r.name for r in resources}
-    assert "Clinical Trial Landscape" in resource_names
+    assert "Insights on Clinical Trial Landscape" in resource_names
     assert "AACT Database Schema" in resource_names
 
 async def test_call_tool_list_tables(handlers, mock_db):
@@ -54,7 +54,7 @@ async def test_call_tool_list_tables(handlers, mock_db):
     assert "conditions" in result[0].text
 
 async def test_read_resource(handlers):
-    uri = AnyUrl("memo://landscape")
+    uri = AnyUrl("memo://insights")
     result = await handlers.handle_read_resource(uri)
     assert isinstance(result, str)
     assert "No landscape analysis available yet" in result

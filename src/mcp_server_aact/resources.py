@@ -10,8 +10,8 @@ class ResourceDefinition(TypedDict):
 
 AACT_RESOURCES: list[ResourceDefinition] = [
     {
-        "uri": "memo://landscape",
-        "name": "Clinical Trial Landscape",
+        "uri": "memo://insights",
+        "name": "Insights on Clinical Trial Landscape",
         "description": "Comprehensive analysis repository capturing key findings about clinical trial patterns, sponsor activities, development trends, and competitive dynamics. This living document grows with each discovered insight to build a complete therapeutic landscape overview.",
         "mimeType": "text/plain",
     },

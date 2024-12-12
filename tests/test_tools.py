@@ -48,9 +48,9 @@ async def test_execute_tool_describe_table(tool_manager, mock_db):
     assert "table_name = %s" in mock_db.execute_query.call_args[0][0]
     assert isinstance(result[0], TextContent)
 
-async def test_execute_tool_append_landscape(tool_manager, mock_memo_manager):
+async def test_execute_tool_append_insights(tool_manager, mock_memo_manager):
     finding = "New finding"
-    result = await tool_manager.execute_tool("append-landscape", {"finding": finding})
-    mock_memo_manager.add_landscape_finding.assert_called_once_with(finding)
+    result = await tool_manager.execute_tool("append-insight", {"finding": finding})
+    mock_memo_manager.add_insights.assert_called_once_with(finding)
     assert isinstance(result[0], TextContent)
-    assert "Landscape finding added" in result[0].text 
+    assert "Insight added" in result[0].text 
