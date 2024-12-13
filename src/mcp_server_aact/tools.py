@@ -103,9 +103,6 @@ class ToolManager:
 
             elif name == "read-query":
                 query = arguments.get("query", "").strip()
-                if not query.upper().startswith("SELECT"):
-                    logger.error(f"Invalid query type attempted: {query[:50]}...")
-                    raise ValueError("Only SELECT queries are allowed for read-query")
                 
                 logger.debug(f"Executing query: {query}")
                 results = self.db.execute_query(query)
