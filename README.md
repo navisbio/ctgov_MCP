@@ -72,7 +72,7 @@ Add the following lines to the file claude_desktop_config.json. (On macOS, the f
     "CTGOV-MCP": {
       "command": "uvx",
       "args": [
-        "server_clinicaltrials_aact"
+        "mcp-server-aact"
       ],
       "env": {
         "DB_USER": USERNAME,
