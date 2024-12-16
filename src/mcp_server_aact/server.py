@@ -1,9 +1,9 @@
 import logging
-from mcp.server import Server, NotificationOptions, RequestContext
+from mcp.server import Server, NotificationOptions
 from mcp.server.models import InitializationOptions
 import mcp.server.stdio
-from .database import AACTDatabase
-from .handlers import MCPHandlers
+from mcp_server_aact.database import AACTDatabase
+from mcp_server_aact.handlers import MCPHandlers
 from mcp.types import LoggingLevel, EmptyResult
 import json
 from pathlib import Path
@@ -28,6 +28,16 @@ class AACTServer(Server):
         # Set up logging handler that sends to MCP client
         self.log_handler = MCPLogHandler(self)
         logger.addHandler(self.log_handler)
+
+    @property
+    def request_context(self):
+        return getattr(self, '_request_context', None)
+
+    @request_context.setter
+    def request_context(self, context):
+        self._request_context = context
+        # Ensure handlers have access to request context
+        self.handlers.request_context = context
 
     def _register_handlers(self):
         @self.list_resources()
