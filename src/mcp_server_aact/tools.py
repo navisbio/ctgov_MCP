@@ -3,6 +3,7 @@ from typing import Any, Optional
 import mcp.types as types
 from mcp_server_aact.database import AACTDatabase
 from mcp_server_aact.memo_manager import MemoManager
+from mcp_server_aact.errors import ToolError, handle_errors
 
 logger = logging.getLogger('mcp_aact_server.tools')
 
@@ -61,68 +62,58 @@ class ToolManager:
         logger.debug(f"Retrieved {len(tools)} available tools")
         return tools
 
+    @handle_errors(ToolError, "Error executing tool {name}: {error}")
     async def execute_tool(self, name: str, arguments: dict[str, Any] | None) -> list[types.TextContent]:
         """Execute a tool with given arguments"""
         logger.info(f"Executing tool: {name} with arguments: {arguments}")
         
-        try:
-            if name not in {tool.name for tool in self.get_available_tools()}:
-                logger.error(f"Unknown tool requested: {name}")
-                raise ValueError(f"Unknown tool: {name}")
+        if name not in {tool.name for tool in self.get_available_tools()}:
+            raise ToolError(f"Unknown tool: {name}")
 
-            if not arguments and name != "list-tables":
-                logger.error("Missing required arguments for tool execution")
-                raise ValueError("Missing required arguments")
+        if not arguments and name != "list-tables":
+            raise ToolError("Missing required arguments")
 
-            if name == "list-tables":
-                logger.debug("Executing list-tables query")
-                results = self.db.execute_query("""
-                    SELECT table_name 
-                    FROM information_schema.tables 
-                    WHERE table_schema = 'ctgov'
-                    ORDER BY table_name;
-                """)
-                logger.info(f"Retrieved {len(results)} tables")
-                return [types.TextContent(type="text", text=str(results))]
+        if name == "list-tables":
+            logger.debug("Executing list-tables query")
+            results = self.db.execute_query("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'ctgov'
+                ORDER BY table_name;
+            """)
+            logger.info(f"Retrieved {len(results)} tables")
+            return [types.TextContent(type="text", text=str(results))]
 
-            elif name == "describe-table":
-                if "table_name" not in arguments:
-                    logger.error("Missing table_name argument for describe-table")
-                    raise ValueError("Missing table_name argument")
-                
-                logger.debug(f"Describing table: {arguments['table_name']}")
-                results = self.db.execute_query("""
-                    SELECT column_name, data_type, character_maximum_length
-                    FROM information_schema.columns
-                    WHERE table_schema = 'ctgov' 
-                    AND table_name = %s
-                    ORDER BY ordinal_position;
-                """, {"table_name": arguments["table_name"]})
-                logger.info(f"Retrieved {len(results)} columns for table {arguments['table_name']}")
-                return [types.TextContent(type="text", text=str(results))]
+        elif name == "describe-table":
+            if "table_name" not in arguments:
+                raise ToolError("Missing table_name argument")
+            
+            logger.debug(f"Describing table: {arguments['table_name']}")
+            results = self.db.execute_query("""
+                SELECT column_name, data_type, character_maximum_length
+                FROM information_schema.columns
+                WHERE table_schema = 'ctgov' 
+                AND table_name = %s
+                ORDER BY ordinal_position;
+            """, {"table_name": arguments["table_name"]})
+            logger.info(f"Retrieved {len(results)} columns for table {arguments['table_name']}")
+            return [types.TextContent(type="text", text=str(results))]
 
-            elif name == "read-query":
-                query = arguments.get("query", "").strip()
-                
-                logger.debug(f"Executing query: {query}")
-                results = self.db.execute_query(query)
-                logger.info(f"Query returned {len(results)} rows")
-                return [types.TextContent(type="text", text=str(results))]
+        elif name == "read-query":
+            query = arguments.get("query", "").strip()
+            
+            logger.debug(f"Executing query: {query}")
+            results = self.db.execute_query(query)
+            logger.info(f"Query returned {len(results)} rows")
+            return [types.TextContent(type="text", text=str(results))]
 
-            elif name == "append-insight":
-                if "finding" not in arguments:
-                    logger.error("Missing finding argument for append-insight")
-                    raise ValueError("Missing finding argument")
-                
-                logger.debug(f"Adding insight: {arguments['finding'][:50]}...")
-                self.memo_manager.add_insights(arguments["finding"])
-                logger.info("Landscape finding added successfully")
-                return [types.TextContent(type="text", text="Insight added")]
+        elif name == "append-insight":
+            if "finding" not in arguments:
+                raise ToolError("Missing finding argument")
+            
+            logger.debug(f"Adding insight: {arguments['finding'][:50]}...")
+            self.memo_manager.add_insights(arguments["finding"])
+            logger.info("Landscape finding added successfully")
+            return [types.TextContent(type="text", text="Insight added")]
 
-        except Exception as e:
-            logger.error(f"Error executing tool {name}: {str(e)}", exc_info=True)
-            return [types.TextContent(
-                type="text",
-                text=f"Error executing tool {name}: {str(e)}",
-                isError=True
-            )]
+        raise ToolError(f"Unhandled tool: {name}")
