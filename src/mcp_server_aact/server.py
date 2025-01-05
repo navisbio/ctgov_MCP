@@ -29,16 +29,6 @@ class AACTServer(Server):
         self.log_handler = MCPLogHandler(self)
         logger.addHandler(self.log_handler)
 
-    @property
-    def request_context(self):
-        return getattr(self, '_request_context', None)
-
-    @request_context.setter
-    def request_context(self, context):
-        self._request_context = context
-        # Ensure handlers have access to request context
-        self.handlers.request_context = context
-
     def _register_handlers(self):
         @self.list_resources()
         async def handle_list_resources():
@@ -69,14 +59,6 @@ class AACTServer(Server):
             """Handle requests to change the logging level"""
             logger.info(f"Setting logging level to {level}")
             logging.getLogger('mcp_aact_server').setLevel(level.upper())
-            
-            # Send confirmation through the session
-            if hasattr(self, 'request_context') and self.request_context:
-                await self.request_context.session.send_log_message(
-                    level="info",
-                    data=f"Log level set to {level}"
-                )
-            
             return EmptyResult()
 
 class MCPLogHandler(logging.Handler):
@@ -86,12 +68,9 @@ class MCPLogHandler(logging.Handler):
 
     def emit(self, record):
         try:
-            if hasattr(self.server, 'request_context') and self.server.request_context:
-                msg = self.format(record)
-                self.server.request_context.session.send_log_message(
-                    level=record.levelname.lower(),
-                    data=msg
-                )
+            msg = self.format(record)
+            # Just log to standard logger instead of trying to send to session
+            logger.log(record.levelno, msg)
         except Exception:
             self.handleError(record)
 
