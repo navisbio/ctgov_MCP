@@ -1,10 +1,10 @@
 [project]
 name = "mcp-server-aact"
-version = "0.2.0"
+version = "0.3.0"
 description = "MCP server for AACT clinical trials database"
 requires-python = ">=3.10"
 dependencies = [
-    "mcp",
+    "mcp>=1.5.0",
     "psycopg2-binary",
     "python-dotenv"
 ]
@@ -32,4 +32,7 @@ dev-dependencies = [
 ]
 
 [project.scripts]
-mcp-server-aact = "mcp_server_aact:main"
+mcp-server-aact = "src:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]

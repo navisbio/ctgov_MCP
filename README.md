@@ -1,81 +1,92 @@
 # AACT Clinical Trials MCP Server
 
 ## Overview
-A Model Context Protocol (MCP) server implementation that provides access to the AACT (Aggregate Analysis of ClinicalTrials.gov) database. This server enables analysis of clinical trial data, tracking development trends, and automatically generating analysis memos that capture insights about therapeutic landscapes.
+A Model Context Protocol (MCP) server implementation that provides access to the AACT (Aggregate Analysis of ClinicalTrials.gov) database using the FastMCP framework. This server allows AI assistants to directly query clinical trial data from the ClinicalTrials.gov database.
 
-## Components
-
-### Resources
-- `memo://insights`: Stores analysis findings and insights about clinical trial patterns
-- `schema://database`: Database schema information
-
-### Prompts
-- `indication-landscape`: Analyzes clinical trial patterns for a given therapeutic area
-  - Required: `topic` (e.g., "multiple sclerosis", "breast cancer")
+## Features
 
 ### Tools
-- `read-query`: Execute SELECT queries on the AACT database
-- `list-tables`: Get available tables in the AACT database
-- `describe-table`: View schema information for a specific table
-- `append-insight`: Add new analysis findings
 
-## Setup
+- `list_tables`
+   - Get an overview of all available tables in the AACT database
+   - Useful for understanding the database structure before analysis
 
-### Database Access
-1. Create a free account at https://aact.ctti-clinicaltrials.org/users/sign_up
-2. Set environment variables:
-   - `DB_USER`: AACT database username
-   - `DB_PASSWORD`: AACT database password
+- `describe_table`
+   - Examine the detailed structure of a specific AACT table
+   - Shows column names and data types
+   - Example: `{"table_name": "studies"}`
 
-## Usage with Claude Desktop
+- `read_query`
+   - Execute a SELECT query on the AACT clinical trials database
+   - Safely handle SQL queries with validation
+   - Example: `{"query": "SELECT nct_id, brief_title FROM ctgov.studies LIMIT 5"}`
 
-Note that you need Claude Desktop and a Claude subscription at the moment. 
+- `append_insight`
+   - Record key findings and insights discovered during analysis
+   - Helps build an analytical narrative
+   - Example: `{"finding": "Phase 3 oncology trials have increased by 15% over the last 5 years"}`
 
-Add one of the following configurations to the file claude_desktop_config.json. (On macOS, the file is located at /Users/YOUR_USERNAME/Library/Application Support/Claude/claude_desktop_config.json and you will need to create it yourself if it does not exist yet).
+### Resources
 
-### Option 1: Using the published package
-```json
-"mcpServers": {
-    "CTGOV-MCP": {
-      "command": "uvx",
-      "args": [
-        "mcp-server-aact"
-      ],
-      "env": {
-        "DB_USER": "USERNAME",
-        "DB_PASSWORD": "PASSWORD"
-      }
+- `schema://database`
+   - Returns the database schema as a JSON resource
+
+- `memo://insights`
+   - Returns a formatted memo of insights collected during the session
+
+## Configuration
+
+### Required Environment Variables
+- `DB_USER`: Your AACT database username
+- `DB_PASSWORD`: Your AACT database password
+
+## Usage with Semantic Kernel
+
+```python
+from semantic_kernel import Kernel
+from semantic_kernel.connectors.mcp import MCPStdioPlugin
+
+# Create an AACT Clinical Trials MCP plugin
+aact_mcp = MCPStdioPlugin(
+    name="aact",
+    description="Clinical Trials Database Plugin",
+    command="uvx",
+    args=["mcp-server-aact"],
+    env={
+        "DB_USER": "your_aact_username", 
+        "DB_PASSWORD": "your_aact_password"
     }
-}
+)
+
+# Add to Semantic Kernel
+kernel = Kernel()
+kernel.add_plugin(aact_mcp)
 ```
 
-### Option 2: Running from source (development)
-```json
-"mcpServers": {
-    "CTGOV-MCP-DEV": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "PATH_TO_REPOSITORY",
-        "run",
-        "mcp-server-aact"
-      ],
-      "env": {
-        "DB_USER": "USERNAME",
-        "DB_PASSWORD": "PASSWORD"
-      }
-    }
-}
-```
+## Example Prompts
+
+Here are some example prompts to use with this plugin:
+
+1. "What are the most common types of interventions in breast cancer clinical trials?"
+2. "How many phase 3 clinical trials were completed in 2023?"
+3. "Show me the enrollment statistics for diabetes trials across different countries"
+4. "What percentage of oncology trials have reported results in the last 5 years?"
+
+## Implementation Details
+
+This server is built using:
+- FastMCP for the Model Context Protocol implementation
+- Python psycopg2 for PostgreSQL database connectivity
+- AACT database as the data source for ClinicalTrials.gov information
+
+## License
+MIT License
 
 ## Contributing
 We welcome contributions! Please:
 - Open an issue on GitHub
 - Start a discussion
 - Email: jonas.walheim@navis-bio.com
-
-## License
-GNU General Public License v3.0 (GPL-3.0)
 
 ## Acknowledgements
 
