@@ -80,9 +80,13 @@ def describe_table(table_name: str) -> str:
         return f"Error: {str(e)}"
 
 @mcp.tool()
-def read_query(query: str) -> str:
+def read_query(query: str, max_rows: int = 25) -> str:
     """Execute a SELECT query on the AACT clinical trials database. 
-    Use this tool to extract and analyze specific data from any table."""
+    Use this tool to extract and analyze specific data from any table.
+    
+    Parameters:
+    - query: The SQL query to execute (must be a SELECT statement)
+    - max_rows: Maximum number of rows to return (default: 25). Increase this value if you need more data."""
     if not query:
         raise Exception("Missing query argument")
     
@@ -92,8 +96,8 @@ def read_query(query: str) -> str:
         return "Error: Only SELECT queries are allowed"
     
     try:
-        results = db.execute_query(query)
-        logger.info(f"Query returned {len(results)} rows")
+        results = db.execute_query(query, row_limit=max_rows)
+        logger.info(f"Query returned {len(results)} rows (limit: {max_rows})")
         return str(results)
     except Exception as e:
         logger.error(f"Error executing query: {e}")

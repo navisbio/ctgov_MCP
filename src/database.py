@@ -46,10 +46,13 @@ class AACTDatabase:
             password=self.password
         )
 
-    def execute_query(self, query: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    def execute_query(self, query: str, params: dict[str, Any] | None = None, row_limit: int | None = None) -> list[dict[str, Any]]:
         logger.debug(f"Executing query: {query}")
         if params:
             logger.debug(f"Query parameters: {params}")
+        if row_limit:
+            logger.debug(f"Row limit: {row_limit}")
+            
         with closing(self._get_connection()) as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
                 if params:
@@ -57,7 +60,10 @@ class AACTDatabase:
                 else:
                     cur.execute(query)
                 if query.strip().upper().startswith(("SELECT", "SHOW", "DESCRIBE")):
-                    results = cur.fetchall()
+                    if row_limit:
+                        results = cur.fetchmany(row_limit)
+                    else:
+                        results = cur.fetchall()
                     logger.debug(f"Query returned {len(results)} rows")
                     return [dict(row) for row in results]
                 else:
